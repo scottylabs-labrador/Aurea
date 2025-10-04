@@ -1,5 +1,5 @@
 # Aurea
-
+hi
 ## Setup
 
 ```bash
