@@ -1,0 +1,52 @@
+// src/react/CameraFeed.tsx
+import React, { useRef, useEffect } from "react";
+import { createHandLandmarker, predictHand } from "../renderer";
+
+export default function CameraFeed() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    async function startCamera() {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+
+      await createHandLandmarker();
+
+      function loop() {
+        if (videoRef.current && canvasRef.current) {
+          predictHand(videoRef.current, canvasRef.current);
+        }
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+    }
+
+    startCamera();
+  }, []);
+
+  return (
+    <div style={{ position: "relative" }}>
+      <video
+        ref={videoRef}
+        id="webcam"
+        style={{ transform: "scaleX(-1)", width: "640px", height: "480px" }}
+      />
+      <canvas
+        ref={canvasRef}
+        id="output_canvas"
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: "640px",
+          height: "480px",
+          transform: "scaleX(-1)",
+        }}
+      />
+    </div>
+  );
+}

@@ -1,31 +1,12 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Hello World!</title>
-    <script
-      src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
-      crossorigin="anonymous"
-    ></script>
-    <link rel="stylesheet" href="/src/index.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Piano App (React)</title>
   </head>
   <body>
-    <div id="main">
-      <video
-        id="webcam"
-        style="position: absolute"
-        autoplay
-        playsinline
-      ></video>
-      <canvas
-        class="output_canvas"
-        id="output_canvas"
-      ></canvas>
-      <div id="info">
-        <span id="positionsL"></span>
-        <span id="positionsR"></span>
-      </div>
-    </div>
-    <script type="module" src="/src/renderer.ts"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/react/index.tsx"></script>
   </body>
 </html>
