@@ -6,6 +6,8 @@ import {
   HandLandmarkerResult,
 } from "@mediapipe/tasks-vision";
 
+import { fingers, fingerIsBent } from "./sign";
+
 let handLandmarker: HandLandmarker | null = null;
 let runningMode: "IMAGE" | "VIDEO" = "IMAGE";
 
@@ -31,16 +33,26 @@ export async function createHandLandmarker() {
 }
 
 /** Run prediction on a video frame */
-export async function predictHand(video: HTMLVideoElement, canvas: HTMLCanvasElement) {
+export async function predictHand(
+  video: HTMLVideoElement,
+  canvas: HTMLCanvasElement,
+  status: HTMLCanvasElement
+) {
   if (!handLandmarker) return;
 
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
+  const canvasCtx = canvas.getContext("2d");
+  if (!canvasCtx) return;
+
+  const statusCtx = status.getContext("2d");
+  if (!statusCtx) return;
 
   // Ensure correct canvas ratio
   const ratio = video.videoWidth / video.videoHeight;
   canvas.width = window.innerWidth;
   canvas.height = window.innerWidth / ratio;
+
+  status.width = window.innerWidth;
+  status.height = window.innerWidth / ratio;
 
   if (runningMode === "IMAGE") {
     runningMode = "VIDEO";
@@ -48,15 +60,23 @@ export async function predictHand(video: HTMLVideoElement, canvas: HTMLCanvasEle
   }
 
   const startTimeMs = performance.now();
-  const results: HandLandmarkerResult = handLandmarker.detectForVideo(video, startTimeMs);
+  const results: HandLandmarkerResult = handLandmarker.detectForVideo(
+    video,
+    startTimeMs
+  );
 
-  ctx.save();
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "rgba(255,255,255,0.55)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  canvasCtx.save();
+  canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+  canvasCtx.fillStyle = "rgba(255,255,255,0.55)";
+  canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+  statusCtx.save();
+  statusCtx.clearRect(0, 0, canvas.width, canvas.height);
+  statusCtx.fillStyle = "rgba(255,255,255,0.55)";
+  statusCtx.fillRect(0, 0, canvas.width, canvas.height);
 
   if (results.landmarks) {
-    const util = new DrawingUtils(ctx);
+    const util = new DrawingUtils(canvasCtx);
 
     for (let i = 0; i < results.landmarks.length; i++) {
       const landmarks = results.landmarks[i];
@@ -65,7 +85,55 @@ export async function predictHand(video: HTMLVideoElement, canvas: HTMLCanvasEle
         lineWidth: 5,
       });
       util.drawLandmarks(landmarks, { color: "#FF0000", lineWidth: 2 });
+
+      const threshold = 0.4;
+      const thresholdThumb = 0.6;
+
+      const thumbBent = fingerIsBent(
+        fingers.wrist,
+        fingers.thumb,
+        landmarks,
+        thresholdThumb
+      );
+      const indexBent = fingerIsBent(
+        fingers.wrist,
+        fingers.index,
+        landmarks,
+        threshold
+      );
+      const middleBent = fingerIsBent(
+        fingers.wrist,
+        fingers.middle,
+        landmarks,
+        threshold
+      );
+      const ringBent = fingerIsBent(
+        fingers.wrist,
+        fingers.ring,
+        landmarks,
+        threshold
+      );
+      const pinkyBent = fingerIsBent(
+        fingers.wrist,
+        fingers.pinky,
+        landmarks,
+        threshold
+      );
+
+      let handStateString: string[] = [
+        `thumb: ${thumbBent ? "bent" : "none"}\t`,
+        `index: ${indexBent ? "bent" : "none"}\t`,
+        `middle: ${middleBent ? "bent" : "none"}\t`,
+        `ring: ${ringBent ? "bent" : "none"}\t`,
+        `pinky: ${pinkyBent ? "bent" : "none"}\t`,
+      ];
+
+      statusCtx.fillStyle = "#000000";
+      statusCtx.font = "bold 24px monospace";
+      for (const [index, str] of handStateString.entries())
+        statusCtx.fillText(str, 520 - 500 * results.handedness[i][0].index, 50 + 30 * index);
     }
   }
-  ctx.restore();
+  canvasCtx.restore();
+  statusCtx.restore();
 }

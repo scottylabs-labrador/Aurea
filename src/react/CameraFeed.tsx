@@ -5,6 +5,7 @@ import { createHandLandmarker, predictHand } from "../renderer";
 export default function CameraFeed() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const statusRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     async function startCamera() {
@@ -18,7 +19,7 @@ export default function CameraFeed() {
 
       function loop() {
         if (videoRef.current && canvasRef.current) {
-          predictHand(videoRef.current, canvasRef.current);
+          predictHand(videoRef.current, canvasRef.current, statusRef.current);
         }
         requestAnimationFrame(loop);
       }
@@ -45,6 +46,17 @@ export default function CameraFeed() {
           width: "640px",
           height: "480px",
           transform: "scaleX(-1)",
+        }}
+      />
+      <canvas
+        ref={statusRef}
+        id="status_canvas"
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: "640px",
+          height: "480px",
         }}
       />
     </div>
