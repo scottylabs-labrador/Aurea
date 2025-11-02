@@ -2,6 +2,8 @@
 import React, { useRef, useEffect } from "react";
 import { createHandLandmarker, predictHand } from "../renderer";
 
+import {drawLineRight} from "./CanvasDraw"
+
 export default function CameraFeed() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -20,6 +22,7 @@ export default function CameraFeed() {
       function loop() {
         if (videoRef.current && canvasRef.current) {
           predictHand(videoRef.current, canvasRef.current, statusRef.current);
+          drawLineRight(canvasRef.current);
         }
         requestAnimationFrame(loop);
       }
