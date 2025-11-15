@@ -4,6 +4,7 @@
     "module": "commonjs",
     "allowJs": true,
     "skipLibCheck": true,
+    "strictNullChecks": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "sourceMap": true,
@@ -11,6 +12,6 @@
     "outDir": "dist",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "jsx": "react-jsx"  
+    "jsx": "react-jsx"
   }
 }
