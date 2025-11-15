@@ -5,13 +5,12 @@ export function drawLineRight(canvas: HTMLCanvasElement){
         ctx.strokeStyle = "black";
         ctx.lineWidth = 10;
 
-  // Example: horizontal line in the middle
+        // Example: horizontal line in the middle
         ctx.beginPath();
         ctx.moveTo(0 + 50, 0);
         ctx.lineTo(0 + 50, canvas.height);
         ctx.stroke();
-    }
-    else{
+    } else {
         return;
     }
     

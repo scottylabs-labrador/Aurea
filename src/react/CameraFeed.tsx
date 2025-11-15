@@ -1,8 +1,8 @@
 // src/react/CameraFeed.tsx
 import React, { useRef, useEffect } from "react";
-import { createHandLandmarker, predictHand } from "../renderer";
+import { createHandLandmarker, predictHandDrawAndUpdate } from "../renderer";
 
-import {drawLineRight} from "./CanvasDraw"
+import { drawLineRight } from "./CanvasDraw"
 
 export default function CameraFeed() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -17,12 +17,12 @@ export default function CameraFeed() {
         await videoRef.current.play();
       }
 
-      await createHandLandmarker();
+      const landmarker = await createHandLandmarker();
 
       function loop() {
         if (videoRef.current && canvasRef.current) {
-          predictHand(videoRef.current, canvasRef.current, statusRef.current);
-          drawLineRight(canvasRef.current);
+          predictHandDrawAndUpdate(landmarker, videoRef.current, canvasRef.current, statusRef.current);
+          // drawLineRight(canvasRef.current);
         }
         requestAnimationFrame(loop);
       }

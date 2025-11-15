@@ -8,37 +8,39 @@ import {
 
 import { fingers, fingerIsBent } from "./sign";
 
-let handLandmarker: HandLandmarker | null = null;
-let runningMode: "IMAGE" | "VIDEO" = "IMAGE";
-
 /** Initialize the hand landmarker model */
 export async function createHandLandmarker() {
-  if (handLandmarker) return handLandmarker; // already created
 
   const vision = await FilesetResolver.forVisionTasks(
     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
   );
 
-  handLandmarker = await HandLandmarker.createFromOptions(vision, {
+  return await HandLandmarker.createFromOptions(vision, {
     baseOptions: {
       modelAssetPath:
         "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
       delegate: "GPU",
     },
-    runningMode,
+    runningMode: "VIDEO",
     numHands: 2,
   });
+}
 
-  return handLandmarker;
+function predictHand(landmarker: HandLandmarker, video: HTMLVideoElement): HandLandmarkerResult {
+  const startTimeMs = performance.now();
+  return landmarker.detectForVideo(
+    video,
+    startTimeMs
+  );
 }
 
 /** Run prediction on a video frame */
-export async function predictHand(
+export async function predictHandDrawAndUpdate(
+  landmarker: HandLandmarker,
   video: HTMLVideoElement,
   canvas: HTMLCanvasElement,
   status: HTMLCanvasElement
 ) {
-  if (!handLandmarker) return;
 
   const canvasCtx = canvas.getContext("2d");
   if (!canvasCtx) return;
@@ -54,16 +56,7 @@ export async function predictHand(
   status.width = window.innerWidth;
   status.height = window.innerWidth / ratio;
 
-  if (runningMode === "IMAGE") {
-    runningMode = "VIDEO";
-    await handLandmarker.setOptions({ runningMode });
-  }
-
-  const startTimeMs = performance.now();
-  const results: HandLandmarkerResult = handLandmarker.detectForVideo(
-    video,
-    startTimeMs
-  );
+  const results = predictHand(landmarker, video);
 
   canvasCtx.save();
   canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
