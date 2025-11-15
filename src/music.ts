@@ -29,10 +29,10 @@ export function maybePlayNoteFromX(x: number, length: string): void {
     const note = xToNote(x);
   
     // Only retrigger if note changed
-    if (note !== lastNote) {
+    //if (note !== lastNote) {
       synth.triggerAttackRelease(note, length);
       lastNote = note;
-    }
+    //}
   }
 
 function xToNote(x:number):string {
