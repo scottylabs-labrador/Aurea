@@ -125,7 +125,20 @@ export async function predictHandDrawAndUpdate(
       statusCtx.font = "bold 24px monospace";
       for (const [index, str] of handStateString.entries())
         statusCtx.fillText(str, 520 - 500 * results.handedness[i][0].index, 50 + 30 * index);
+
+      if (results.handedness[i][0].categoryName == 'Left'){
+        const right_point = (results.landmarks[i][17]) //point 17, pinky base
+        const pixel_dist_x = (right_point.x).toFixed(1)
+        const pixel_dist_y = (right_point.y).toFixed(1)
+        console.log(right_point, video.width)
+        const dist_text = `Right-hand x, y dist: (${pixel_dist_x}, ${pixel_dist_y}) px`;
+
+    // Draw it on camera (choose any position you like)
+      statusCtx.fillStyle = "#FF0000";
+      statusCtx.fillText(dist_text, 20, 40);
+      }
     }
+
   }
   canvasCtx.restore();
   statusCtx.restore();
