@@ -110,7 +110,10 @@ export async function handDrawAndUpdate(
     // Draw it on camera (choose any position you like)
       statusCtx.fillStyle = "#FF0000";
       statusCtx.fillText(dist_text, 20, 40);
+      //play note:
+      //maybePlayNoteFromX(pixel_dist_x as number, "8n"); //replace this later
       }
+      
     }
 
   }
