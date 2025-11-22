@@ -8,11 +8,22 @@ import { drawLineRight } from "./CanvasDraw"
 import { handleRight } from "./Right"
 
 export default function CameraFeed() {
+  const [leftNumber, setLeftNumber] = React.useState<number | null>(null);
+  const [leftChord, setLeftChord] = React.useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const statusRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
+    function handleAureaLeftDetect(e: Event) {
+      const ev = e as CustomEvent<{ number: number; chord: string | null }>;
+      if (ev && ev.detail) {
+        setLeftNumber(ev.detail.number ?? null);
+        setLeftChord(ev.detail.chord ?? null);
+      }
+    }
+
+    window.addEventListener("aurea-left-detect", handleAureaLeftDetect as EventListener);
     async function startCamera() {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       if (videoRef.current) {
@@ -34,6 +45,10 @@ export default function CameraFeed() {
     }
 
     startCamera();
+
+    return () => {
+      window.removeEventListener("aurea-left-detect", handleAureaLeftDetect as EventListener);
+    };
   }, []);
 
 //  useEffect(() => {
@@ -51,6 +66,21 @@ export default function CameraFeed() {
 
   return (
     <div style={{ position: "relative" }}>
+      {/* ui for left-hand detection and chord */}
+      <div style={{
+        position: 'absolute',
+        top: 6,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 10,
+        background: 'rgba(0,0,0,0.6)',
+        color: 'white',
+        padding: '6px 12px',
+        borderRadius: 8,
+        fontWeight: 'bold',
+      }}>
+        Left: {leftNumber ?? '—'} &nbsp; • &nbsp; {leftChord ?? '—'}
+      </div>
       <video
         ref={videoRef}
         id="webcam"

@@ -6,9 +6,9 @@ import {
   HandLandmarkerResult,
 } from "@mediapipe/tasks-vision";
 
-import { fingerIsBent } from "./sign";
+import { fingerIsBent, detectNumberFromLandmarks } from "./sign";
 
-import { maybePlayNoteFromX } from "./music";
+import { maybePlayNoteFromX, playNoteForNumber, startSustainedChord, stopSustainedChord } from "./music";
 
 import { fingers, createHandLandmarker, predictHand } from "./landmarker"
 
@@ -44,7 +44,18 @@ export async function handDrawAndUpdate(
   statusCtx.fillStyle = "rgba(255,255,255,0.55)";
   statusCtx.fillRect(0, 0, canvas.width, canvas.height);
 
+  //mirror video if needed
+  const videoTransform = video?.style?.transform ?? "";
+  const isMirrored = videoTransform.includes("scaleX(-1)");
+
   if (results.landmarks) {
+    // smoothing for chord changes
+    const LEFT_BUFFER_SIZE = 6;
+    const LEFT_CHANGE_THRESHOLD = Math.ceil(LEFT_BUFFER_SIZE * 0.66);
+    const win = window as any;
+    if (!Array.isArray(win.__aurea_leftBuffer)) win.__aurea_leftBuffer = [] as (number | null)[];
+    if (typeof win.__aurea_lastConfirmedLeftNumber === 'undefined') win.__aurea_lastConfirmedLeftNumber = null as number | null;
+
     const util = new DrawingUtils(canvasCtx);
 
     for (let i = 0; i < results.landmarks.length; i++) {
@@ -102,18 +113,60 @@ export async function handDrawAndUpdate(
       for (const [index, str] of handStateString.entries())
         statusCtx.fillText(str, 520 - 500 * results.handedness[i][0].index, 50 + 30 * index);
 
-      if (results.handedness[i][0].categoryName == 'Left'){
-        const right_point = (results.landmarks[i][17]) //point 17, pinky base
-        const pixel_dist_x = (right_point.x).toFixed(1)
-        const pixel_dist_y = (right_point.y).toFixed(1)
-        
-        const dist_text = `Right-hand x, y dist: (${pixel_dist_x}, ${pixel_dist_y}) px`;
-      
-    // Draw it on camera (choose any position you like)
-      statusCtx.fillStyle = "#FF0000";
-      statusCtx.fillText(dist_text, 20, 40);
-      //play note:
-        maybePlayNoteFromX(pixel_dist_x as number, "8n"); //replace this later
+      //determine which hand
+      const cameraHanded = results.handedness[i][0].categoryName;
+      const isUiLeft = isMirrored ? cameraHanded === 'Right' : cameraHanded === 'Left';
+
+      if (isUiLeft) {
+        //left hand: detect number and play note
+        const detected = detectNumberFromLandmarks(landmarks);
+        if (detected) {
+          const numText = `Left-hand (UI) number: ${detected.number}`;
+          statusCtx.fillStyle = "#FF0000";
+          statusCtx.fillText(numText, 20, 40);
+
+          // buffer
+          win.__aurea_leftBuffer.push(detected.number);
+          if (win.__aurea_leftBuffer.length > LEFT_BUFFER_SIZE) win.__aurea_leftBuffer.shift();
+
+          // mode and count
+          const counts: Record<string, number> = {};
+          for (const v of win.__aurea_leftBuffer) {
+            const key = String(v);
+            counts[key] = (counts[key] || 0) + 1;
+          }
+          let modeVal: number | null = null;
+          let modeCount = 0;
+          for (const k of Object.keys(counts)) {
+            if (counts[k] > modeCount) {
+              modeCount = counts[k];
+              modeVal = k === 'null' ? null : Number(k);
+            }
+          }
+
+          // only get number if its stable (buffer)
+          const prevConfirmed = win.__aurea_lastConfirmedLeftNumber as number | null;
+          if (modeCount >= LEFT_CHANGE_THRESHOLD && modeVal !== prevConfirmed) {
+            // change confirmed value
+            // stop old chord
+            if (typeof prevConfirmed === 'number' && prevConfirmed > 0) stopSustainedChord(prevConfirmed);
+
+            win.__aurea_lastConfirmedLeftNumber = modeVal;
+
+            if (typeof modeVal === 'number' && modeVal > 0) {
+              // start new sustained chord
+              const chordName = startSustainedChord(modeVal);
+              try {
+                window.dispatchEvent(new CustomEvent('aurea-left-detect', { detail: { number: modeVal, chord: chordName } }));
+              } catch (e) {}
+            } else {
+              stopSustainedChord();
+              try {
+                window.dispatchEvent(new CustomEvent('aurea-left-detect', { detail: { number: modeVal, chord: null } }));
+              } catch (e) {}
+            }
+          }
+        }
       }
       
     }
