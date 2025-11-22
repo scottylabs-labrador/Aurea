@@ -64,6 +64,10 @@ class HandState {
     return true;
   }
 
+  getStates(): Vector[] {
+    return Object.create(this.#state);
+  }
+
   getFingerStates(): FingerStates[] {
     return Object.create(this.#fingerStates);
   }

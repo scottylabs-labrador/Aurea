@@ -6,6 +6,7 @@ let polySynth: Tone.PolySynth | null = null;
 let audioReady = false;
 let lastNote: string | null = null;
 let lastNoteLength: string | null = null;
+let lastNoteTime: number = 0;
 
 // Called from App button
 export async function initAudio(): Promise<void> {
@@ -87,14 +88,21 @@ export function maybePlayNoteFromX(
   scaleType: ScaleType,
   length: string
 ): void {
-  if (!audioReady || !synth) return;
+  if (!audioReady || !synth) {
+    console.warn('maybePlayNoteFromX: audio not ready or synth not initialized');
+    return;
+  }
 
   const note = xToNote(x, key, scaleType);
-
-  //if (note !== lastNote) {
+  const now = Date.now();
+  
+  // Play if note changed OR if enough time has passed (throttle to 150ms)
+  if (note !== lastNote || (now - lastNoteTime) > 150) {
+    console.log(`Playing note: ${note} (x=${x.toFixed(3)})`);
     synth.triggerAttackRelease(note, length);
     lastNote = note;
-  //}
+    lastNoteTime = now;
+  }
 }
 
   export function xToNote(
@@ -166,12 +174,21 @@ export function playNoteForNumber(n: number, length = "8n") {
 
 //play a sustained chord
 export function startSustainedChord(n: number) {
-  if (!audioReady || !polySynth) return null;
+  console.log(`startSustainedChord called with n=${n}, audioReady=${audioReady}, polySynth=${!!polySynth}`);
+  
+  if (!audioReady || !polySynth) {
+    console.warn('Audio not ready or polySynth not initialized');
+    return null;
+  }
 
   const notes = CHORD_MAP[n];
-  if (!notes) return null;
+  if (!notes) {
+    console.warn(`No chord mapping for number ${n}`);
+    return null;
+  }
 
   try {
+    console.log(`Playing chord: ${notes.join(', ')}`);
     polySynth.triggerAttack(notes);
     return CHORD_NAME_MAP[n] ?? notes.join(" ");
   } catch (e) {
