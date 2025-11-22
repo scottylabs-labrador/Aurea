@@ -6,6 +6,8 @@ import {
   HandLandmarkerResult,
 } from "@mediapipe/tasks-vision";
 
+import type { KeyConfig } from "./react/KeyControls";
+
 import { fingerIsBent } from "./sign";
 
 import { maybePlayNoteFromX } from "./music";
@@ -17,7 +19,8 @@ export async function handDrawAndUpdate(
   results: HandLandmarkerResult,
   video: HTMLVideoElement,
   canvas: HTMLCanvasElement,
-  status: HTMLCanvasElement
+  status: HTMLCanvasElement,
+  keyConfig: KeyConfig   
 ) {
 
   const canvasCtx = canvas.getContext("2d");
@@ -113,7 +116,7 @@ export async function handDrawAndUpdate(
       statusCtx.fillStyle = "#FF0000";
       statusCtx.fillText(dist_text, 20, 40);
       //play note:
-        maybePlayNoteFromX(pixel_dist_x as number, "8n"); //replace this later
+        maybePlayNoteFromX(pixel_dist_x as number, keyConfig.key, keyConfig.scaleType, "8n"); //replace this later
       }
       
     }
