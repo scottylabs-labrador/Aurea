@@ -7,7 +7,13 @@ import { predictHand, createHandLandmarker, extractHandStates } from "../landmar
 import { drawLineRight } from "./CanvasDraw"
 import { handleRight } from "./Right"
 
-export default function CameraFeed() {
+import type { KeyConfig } from "./KeyControls";   
+
+type CameraFeedProps = {
+  keyConfig: KeyConfig;   
+};
+
+export default function CameraFeed({ keyConfig }: CameraFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const statusRef = useRef<HTMLCanvasElement>(null);
@@ -25,8 +31,8 @@ export default function CameraFeed() {
       function loop() {
         if (videoRef.current && canvasRef.current && statusRef.current) {
           const results = predictHand(landmarker, videoRef.current);
-          extractHandStates(results);
-          handDrawAndUpdate(results, videoRef.current, canvasRef.current, statusRef.current);
+          // extractHandStates(results);
+          handDrawAndUpdate(results, videoRef.current, canvasRef.current, statusRef.current, keyConfig);
           // drawLineRight(canvasRef.current);
         } 
         requestAnimationFrame(loop);
@@ -35,7 +41,7 @@ export default function CameraFeed() {
     }
 
     startCamera();
-  }, []);
+  }, [keyConfig]);
 
 //  useEffect(() => {
 //    async function handleRightHand() {
