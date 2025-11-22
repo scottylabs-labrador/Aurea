@@ -53,12 +53,12 @@ export async function handDrawAndUpdate(
     for (let i = 0; i < handStates.length; i++) {
       if (handStates[i] == undefined) continue;
 
-      const landmarks = results.landmarks[i];
-      util.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, {
-        color: "#00FF00",
-        lineWidth: 5,
-      });
-      util.drawLandmarks(landmarks, { color: "#FF0000", lineWidth: 2 });
+      // const landmarks = results.landmarks[i];
+      // util.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, {
+      //   color: "#00FF00",
+      //   lineWidth: 5,
+      // });
+      // util.drawLandmarks(landmarks, { color: "#FF0000", lineWidth: 2 });
 
       const fingerStates = handStates[i].getFingerStates();
 
@@ -73,10 +73,10 @@ export async function handDrawAndUpdate(
       statusCtx.fillStyle = "#000000";
       statusCtx.font = "bold 24px monospace";
       for (const [index, str] of handStateString.entries())
-        statusCtx.fillText(str, 520 - 500 * results.handedness[i][0].index, 50 + 30 * index);
+        statusCtx.fillText(str, 520 - 500 * i, 50 + 30 * index);
 
-      if (results.handedness[i][0].categoryName == 'Left'){
-        const right_point = (results.landmarks[i][17]) //point 17, pinky base
+      if (i == 1){
+        const right_point = (handStates[i].getStates()[17]) //point 17, pinky base
         const pixel_dist_x = (right_point.x).toFixed(1)
         const pixel_dist_y = (right_point.y).toFixed(1)
         
@@ -87,7 +87,7 @@ export async function handDrawAndUpdate(
       statusCtx.fillText(dist_text, 20, 40);
 
       //play note:
-        maybePlayNoteFromX(Math.floor(right_point.x), keyConfig.key, keyConfig.scaleType, "8n"); //replace this later
+        maybePlayNoteFromX(pixel_dist_x as number, keyConfig.key, keyConfig.scaleType, "8n"); //replace this later
 
       }
       
