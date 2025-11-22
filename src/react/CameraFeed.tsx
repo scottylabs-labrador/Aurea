@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import { handDrawAndUpdate } from "../renderer";
 
-import { predictHand, createHandLandmarker } from "src/landmarker";
+import { predictHand, createHandLandmarker } from "../landmarker";
 
 import { drawLineRight } from "./CanvasDraw"
 
@@ -22,10 +22,9 @@ export default function CameraFeed() {
       const landmarker = await createHandLandmarker();
 
       function loop() {
-        if (videoRef.current && canvasRef.current) {
+        if (videoRef.current && canvasRef.current && statusRef.current) {
           const results = predictHand(landmarker, videoRef.current);
-          if (videoRef.current != null && canvasRef.current != null && statusRef.current != null)
-            handDrawAndUpdate(results, videoRef.current, canvasRef.current, statusRef.current);
+          handDrawAndUpdate(results, videoRef.current, canvasRef.current, statusRef.current);
           // drawLineRight(canvasRef.current);
         } 
         requestAnimationFrame(loop);
