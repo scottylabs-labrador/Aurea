@@ -6,18 +6,21 @@ import {
   HandLandmarkerResult,
 } from "@mediapipe/tasks-vision";
 
-import { fingerIsBent, detectNumberFromLandmarks } from "./sign";
+import { fingerIsBent, detectNumberFromLandmarks } from "./left_number";
+import type { KeyConfig } from "./react/KeyControls";
 
 import { maybePlayNoteFromX, playNoteForNumber, startSustainedChord, stopSustainedChord } from "./music";
 
-import { fingers, createHandLandmarker, predictHand } from "./landmarker"
+import { fingerIsBent, fingers, createHandLandmarker, predictHand, extractHandStates, FingerStates } from "./landmarker"
+import { assert } from "tone/build/esm/core/util/Debug";
 
 /** Run prediction on a video frame */
 export async function handDrawAndUpdate(
   results: HandLandmarkerResult,
   video: HTMLVideoElement,
   canvas: HTMLCanvasElement,
-  status: HTMLCanvasElement
+  status: HTMLCanvasElement,
+  keyConfig: KeyConfig   
 ) {
 
   const canvasCtx = canvas.getContext("2d");
@@ -58,7 +61,11 @@ export async function handDrawAndUpdate(
 
     const util = new DrawingUtils(canvasCtx);
 
-    for (let i = 0; i < results.landmarks.length; i++) {
+    const handStates = extractHandStates(results);
+
+    for (let i = 0; i < handStates.length; i++) {
+      if (handStates[i] == undefined) continue;
+
       const landmarks = results.landmarks[i];
       util.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, {
         color: "#00FF00",
@@ -66,52 +73,34 @@ export async function handDrawAndUpdate(
       });
       util.drawLandmarks(landmarks, { color: "#FF0000", lineWidth: 2 });
 
-      const threshold = 0.4;
-      const thresholdThumb = 0.6;
-
-      const thumbBent = fingerIsBent(
-        fingers.wrist,
-        fingers.thumb,
-        landmarks,
-        thresholdThumb
-      );
-      const indexBent = fingerIsBent(
-        fingers.wrist,
-        fingers.index,
-        landmarks,
-        threshold
-      );
-      const middleBent = fingerIsBent(
-        fingers.wrist,
-        fingers.middle,
-        landmarks,
-        threshold
-      );
-      const ringBent = fingerIsBent(
-        fingers.wrist,
-        fingers.ring,
-        landmarks,
-        threshold
-      );
-      const pinkyBent = fingerIsBent(
-        fingers.wrist,
-        fingers.pinky,
-        landmarks,
-        threshold
-      );
+      const fingerStates = handStates[i].getFingerStates();
 
       let handStateString: string[] = [
-        `thumb: ${thumbBent ? "bent" : "none"}\t`,
-        `index: ${indexBent ? "bent" : "none"}\t`,
-        `middle: ${middleBent ? "bent" : "none"}\t`,
-        `ring: ${ringBent ? "bent" : "none"}\t`,
-        `pinky: ${pinkyBent ? "bent" : "none"}\t`,
+        `thumb: ${fingerStates[0] == FingerStates.CLOSED ? "bent" : "none"}\t`,
+        `index: ${fingerStates[1] == FingerStates.CLOSED ? "bent" : "none"}\t`,
+        `middle: ${fingerStates[2] == FingerStates.CLOSED ? "bent" : "none"}\t`,
+        `ring: ${fingerStates[3]== FingerStates.CLOSED ? "bent" : "none"}\t`,
+        `pinky: ${fingerStates[4] == FingerStates.CLOSED ? "bent" : "none"}\t`,
       ];
 
       statusCtx.fillStyle = "#000000";
       statusCtx.font = "bold 24px monospace";
       for (const [index, str] of handStateString.entries())
         statusCtx.fillText(str, 520 - 500 * results.handedness[i][0].index, 50 + 30 * index);
+
+      if (results.handedness[i][0].categoryName == 'Left'){
+        const right_point = (results.landmarks[i][17]) //point 17, pinky base
+        const pixel_dist_x = (right_point.x).toFixed(1)
+        const pixel_dist_y = (right_point.y).toFixed(1)
+        
+        const dist_text = `Right-hand x, y dist: (${pixel_dist_x}, ${pixel_dist_y}) px`;
+      
+    // Draw it on camera (choose any position you like)
+      statusCtx.fillStyle = "#FF0000";
+      statusCtx.fillText(dist_text, 20, 40);
+
+      //play note:
+        maybePlayNoteFromX(Math.floor(right_point.x), keyConfig.key, keyConfig.scaleType, "8n"); //replace this later
 
       //determine which hand
       const cameraHanded = results.handedness[i][0].categoryName;

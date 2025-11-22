@@ -3,9 +3,29 @@ import {
   HandLandmarker,
   FilesetResolver,
   HandLandmarkerResult,
+  NormalizedLandmark
 } from "@mediapipe/tasks-vision";
 
 import { Vector } from "./vector"
+
+function toVector(landmark: NormalizedLandmark): Vector {
+  return new Vector(landmark.x, landmark.y, landmark.z);
+}
+
+export function fingerIsBent(wristID: number, jointsID: number[], nodes: Vector[], threshold: number) {
+  const wrist: Vector = nodes[wristID];
+  const node1: Vector = nodes[jointsID[0]];
+  const node2: Vector = nodes[jointsID[1]];
+  const node3: Vector = nodes[jointsID[3]];
+
+  const d1: Vector = node1.sub(wrist);
+  const d2: Vector = node3.sub(node2);
+
+  const cosine: number = d1.dot(d2) / (d1.norm() * d2.norm());
+
+  return cosine < threshold;
+}
+
 
 export const fingers = {
   wrist: 0,
@@ -16,11 +36,37 @@ export const fingers = {
   pinky: [17, 18, 19, 20],
 }
 
-class HandsState {
-  hasLeft: boolean;
-  hasRight: boolean;
-  left: Vector[];
-  right: Vector[];
+export enum FingerStates { ANY, OPEN, CLOSED }
+
+class HandState {
+  #state: Vector[];
+  #fingerStates: FingerStates[] = [];
+
+  constructor(state: Vector[]) {
+    this.#state = state;
+
+    const thresholds = [0.6, 0.4, 0.4, 0.4, 0.4];
+
+    this.#fingerStates.push(fingerIsBent(fingers.wrist, fingers.thumb, this.#state, thresholds[0])? FingerStates.CLOSED : FingerStates.OPEN);
+    this.#fingerStates.push(fingerIsBent(fingers.wrist, fingers.index, this.#state, thresholds[1])? FingerStates.CLOSED : FingerStates.OPEN);
+    this.#fingerStates.push(fingerIsBent(fingers.wrist, fingers.middle, this.#state, thresholds[2])? FingerStates.CLOSED : FingerStates.OPEN);
+    this.#fingerStates.push(fingerIsBent(fingers.wrist, fingers.ring, this.#state, thresholds[3])? FingerStates.CLOSED : FingerStates.OPEN);
+    this.#fingerStates.push(fingerIsBent(fingers.wrist, fingers.pinky, this.#state, thresholds[4])? FingerStates.CLOSED : FingerStates.OPEN);
+  }
+
+  matchesFingers(pattern: FingerStates[]): boolean {
+    for (let i = 0; i < 5; i++) {
+      if (pattern[i] == FingerStates.ANY) continue;
+      if (pattern[i] == this.#fingerStates[i]) continue;
+      return false;
+    }
+
+    return true;
+  }
+
+  getFingerStates(): FingerStates[] {
+    return Object.create(this.#fingerStates);
+  }
 }
 
 /** Initialize the hand landmarker model */
@@ -49,3 +95,22 @@ export function predictHand(landmarker: HandLandmarker, video: HTMLVideoElement)
   );
 }
 
+/**
+ * 
+ * @param result landmarker result from mediapipe
+ * @returns [left hand state, right hand state]
+ */
+export function extractHandStates(result: HandLandmarkerResult): [HandState?, HandState?] {
+  // console.log(result);
+  let hands_state: [HandState?, HandState?] = [undefined, undefined];
+  for (let i = 0; i < result.handedness.length; i++) {
+    let index = 0;
+    if (result.handedness[i][0].index == 0)
+      index = 1;
+
+    const state = result.landmarks[i].map((value) => toVector(value));
+
+    hands_state[index] = new HandState(state);
+  }
+  return hands_state;
+}
