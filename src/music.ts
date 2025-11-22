@@ -14,10 +14,10 @@ export async function initAudio(): Promise<void> {
     synth = new Tone.Synth().toDestination();
     audioReady = true;
 
-    console.log("Audio initialized");
+    //console.log("Audio initialized");
 
 
-    //synth.triggerAttackRelease("C4", "8n");
+    synth.triggerAttackRelease("C4", "8n");
 }
 
 

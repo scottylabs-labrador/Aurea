@@ -8,6 +8,8 @@ import {
 
 import { fingerIsBent } from "./sign";
 
+import { maybePlayNoteFromX } from "./music";
+
 import { fingers, createHandLandmarker, predictHand } from "./landmarker"
 
 /** Run prediction on a video frame */
@@ -111,7 +113,7 @@ export async function handDrawAndUpdate(
       statusCtx.fillStyle = "#FF0000";
       statusCtx.fillText(dist_text, 20, 40);
       //play note:
-      //maybePlayNoteFromX(pixel_dist_x as number, "8n"); //replace this later
+        maybePlayNoteFromX(pixel_dist_x as number, "8n"); //replace this later
       }
       
     }
