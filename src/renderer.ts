@@ -1,3 +1,4 @@
+// src/model/handLandmarker.ts
 import {
   HandLandmarker,
   FilesetResolver,
@@ -5,121 +6,119 @@ import {
   HandLandmarkerResult,
 } from "@mediapipe/tasks-vision";
 
-let handLandmarker: HandLandmarker;
-let runningMode = "IMAGE";
+import { fingerIsBent } from "./sign";
 
-const createHandLandmarker = async () => {
-  const vision = await FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
-  );
-  handLandmarker = await HandLandmarker.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
-      delegate: "GPU",
-    },
-    runningMode: "IMAGE",
-    numHands: 2,
-  });
-};
+import { maybePlayNoteFromX } from "./music";
 
-const video = document.getElementById("webcam") as HTMLVideoElement;
-const canvasElement = document.getElementById(
-  "output_canvas"
-) as HTMLCanvasElement;
-const canvasCtx = canvasElement.getContext("2d");
+import { fingers, createHandLandmarker, predictHand } from "./landmarker"
 
-function enableCam() {
-  if (!handLandmarker) {
-    console.log("Wait! objectDetector not loaded yet.");
-    return;
-  }
+/** Run prediction on a video frame */
+export async function handDrawAndUpdate(
+  results: HandLandmarkerResult,
+  video: HTMLVideoElement,
+  canvas: HTMLCanvasElement,
+  status: HTMLCanvasElement
+) {
 
-  const constraints = {
-    video: true,
-  };
+  const canvasCtx = canvas.getContext("2d");
+  if (canvasCtx == null) return;
 
-  navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-    video.srcObject = stream;
-    video.addEventListener("loadeddata", predictWebcam);
-  });
-}
+  const statusCtx = status.getContext("2d");
+  if (statusCtx == null) return;
 
-let lastVideoTime = -1;
-let results: HandLandmarkerResult;
-
-async function predictWebcam() {
+  // Ensure correct canvas ratio
   const ratio = video.videoWidth / video.videoHeight;
-  canvasElement.width = window.innerWidth;
-  canvasElement.height = window.innerWidth / ratio;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerWidth / ratio;
 
-  if (runningMode === "IMAGE") {
-    runningMode = "VIDEO";
-    await handLandmarker.setOptions({ runningMode: "VIDEO" });
-  }
-  const startTimeMs = performance.now();
-  if (lastVideoTime !== video.currentTime) {
-    lastVideoTime = video.currentTime;
-    results = handLandmarker.detectForVideo(video, startTimeMs);
-  }
+  status.width = window.innerWidth;
+  status.height = window.innerWidth / ratio;
+
   canvasCtx.save();
-  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-  canvasCtx.fillStyle = "rgba(255, 255, 255, 0.55)";
-  canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+  canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+  canvasCtx.fillStyle = "rgba(255,255,255,0.55)";
+  canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+  statusCtx.save();
+  statusCtx.clearRect(0, 0, canvas.width, canvas.height);
+  statusCtx.fillStyle = "rgba(255,255,255,0.55)";
+  statusCtx.fillRect(0, 0, canvas.width, canvas.height);
+
   if (results.landmarks) {
     const util = new DrawingUtils(canvasCtx);
-    const n = results.handedness.length;
-    for (let i = 0; i < n; i++) {
-      const landmarks = results.landmarks[i];
-      console.log(results.handedness[i][0].index);
-      console.log(results.handedness[i][0].categoryName);
 
+    for (let i = 0; i < results.landmarks.length; i++) {
+      const landmarks = results.landmarks[i];
       util.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, {
         color: "#00FF00",
         lineWidth: 5,
       });
-
       util.drawLandmarks(landmarks, { color: "#FF0000", lineWidth: 2 });
 
-      let positions: HTMLElement;
-      if (results.handedness[i][0].index == 0) {
-        positions = document.getElementById("positionsR");
-      } else {
-        positions = document.getElementById("positionsL");
-      }
-      const distance_1 = Math.sqrt(
-        (landmarks[12].x - landmarks[4].x) ** 2 +
-          (landmarks[12].y - landmarks[4].y) ** 2
+      const threshold = 0.4;
+      const thresholdThumb = 0.6;
+
+      const thumbBent = fingerIsBent(
+        fingers.wrist,
+        fingers.thumb,
+        landmarks,
+        thresholdThumb
       );
-      const distance_ref = Math.sqrt(
-        (landmarks[0].x - landmarks[5].x) ** 2 +
-          (landmarks[0].y - landmarks[5].y) ** 2
+      const indexBent = fingerIsBent(
+        fingers.wrist,
+        fingers.index,
+        landmarks,
+        threshold
       );
-      const d1_rel = distance_1 / distance_ref;
-      positions.innerHTML = `${distance_1.toFixed(3)} ${distance_ref.toFixed(3)} ${(distance_1 / distance_ref).toFixed(3)}`;
-      if (d1_rel < 0.3) {
-        positions.style.backgroundColor = "#ffc0c0";
-        canvasCtx.fillStyle = "rgba(255,0,0,0.5)";
-        const x = (landmarks[12].x + landmarks[4].x) / 2;
-        const y = (landmarks[12].y + landmarks[4].y) / 2;
-        canvasCtx.fillRect(
-          x * canvasElement.width - 50,
-          y * canvasElement.height - 50,
-          100,
-          100
-        );
-      } else {
-        positions.style.backgroundColor = "#ffffff";
+      const middleBent = fingerIsBent(
+        fingers.wrist,
+        fingers.middle,
+        landmarks,
+        threshold
+      );
+      const ringBent = fingerIsBent(
+        fingers.wrist,
+        fingers.ring,
+        landmarks,
+        threshold
+      );
+      const pinkyBent = fingerIsBent(
+        fingers.wrist,
+        fingers.pinky,
+        landmarks,
+        threshold
+      );
+
+      let handStateString: string[] = [
+        `thumb: ${thumbBent ? "bent" : "none"}\t`,
+        `index: ${indexBent ? "bent" : "none"}\t`,
+        `middle: ${middleBent ? "bent" : "none"}\t`,
+        `ring: ${ringBent ? "bent" : "none"}\t`,
+        `pinky: ${pinkyBent ? "bent" : "none"}\t`,
+      ];
+
+      statusCtx.fillStyle = "#000000";
+      statusCtx.font = "bold 24px monospace";
+      for (const [index, str] of handStateString.entries())
+        statusCtx.fillText(str, 520 - 500 * results.handedness[i][0].index, 50 + 30 * index);
+
+      if (results.handedness[i][0].categoryName == 'Left'){
+        const right_point = (results.landmarks[i][17]) //point 17, pinky base
+        const pixel_dist_x = (right_point.x).toFixed(1)
+        const pixel_dist_y = (right_point.y).toFixed(1)
+        
+        const dist_text = `Right-hand x, y dist: (${pixel_dist_x}, ${pixel_dist_y}) px`;
+      
+    // Draw it on camera (choose any position you like)
+      statusCtx.fillStyle = "#FF0000";
+      statusCtx.fillText(dist_text, 20, 40);
+      //play note:
+        maybePlayNoteFromX(pixel_dist_x as number, "8n"); //replace this later
       }
+      
     }
+
   }
   canvasCtx.restore();
-
-  window.requestAnimationFrame(predictWebcam);
+  statusCtx.restore();
 }
-
-document.onreadystatechange = async () => {
-  if (document.readyState === "complete") {
-    await createHandLandmarker();
-    enableCam();
-  }
-};
