@@ -8,8 +8,11 @@ import {
 
 import { fingerIsBent } from "./sign";
 
+<<<<<<< HEAD
 import { maybePlayNoteFromX } from "./music";
 
+=======
+>>>>>>> hand_recognition
 import { fingers, createHandLandmarker, predictHand } from "./landmarker"
 
 /** Run prediction on a video frame */
