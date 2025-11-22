@@ -70,12 +70,12 @@ export async function handDrawAndUpdate(
     for (let i = 0; i < results.landmarks.length; i++) {
       if (!results.landmarks[i] || !results.handedness[i] || !results.handedness[i][0]) continue;
 
-      const landmarks = results.landmarks[i];
-      util.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, {
-        color: "#00FF00",
-        lineWidth: 5,
-      });
-      util.drawLandmarks(landmarks, { color: "#FF0000", lineWidth: 2 });
+      // const landmarks = results.landmarks[i];
+      // util.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, {
+      //   color: "#00FF00",
+      //   lineWidth: 5,
+      // });
+      // util.drawLandmarks(landmarks, { color: "#FF0000", lineWidth: 2 });
 
       //determine which hand
       const cameraHanded = results.handedness[i][0].categoryName;
