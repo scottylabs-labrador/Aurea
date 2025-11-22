@@ -1,13 +1,8 @@
 // src/react/CameraFeed.tsx
 import React, { useRef, useEffect } from "react";
-<<<<<<< HEAD
-import { createHandLandmarker, predictHand } from "../landmarker";
-import { handDrawAndUpdate } from "../renderer";
-=======
 import { handDrawAndUpdate } from "../renderer";
 
 import { predictHand, createHandLandmarker } from "../landmarker";
->>>>>>> hand_recognition
 
 import { drawLineRight } from "./CanvasDraw"
 import { handleRight } from "./Right"
