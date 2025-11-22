@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import { handDrawAndUpdate } from "../renderer";
 
-import { predictHand, createHandLandmarker } from "../landmarker";
+import { predictHand, createHandLandmarker, extractHandStates } from "../landmarker";
 
 import { drawLineRight } from "./CanvasDraw"
 import { handleRight } from "./Right"
@@ -25,6 +25,7 @@ export default function CameraFeed() {
       function loop() {
         if (videoRef.current && canvasRef.current && statusRef.current) {
           const results = predictHand(landmarker, videoRef.current);
+          extractHandStates(results);
           handDrawAndUpdate(results, videoRef.current, canvasRef.current, statusRef.current);
           // drawLineRight(canvasRef.current);
         } 
