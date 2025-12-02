@@ -2,11 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import { handDrawAndUpdate } from "../renderer";
 
-import { predictHand, createHandLandmarker, extractHandStates } from "../landmarker";
-
-import { drawLineRight } from "./CanvasDraw"
-import { handleRight } from "./Right"
-
+import { predictHand, createHandLandmarker } from "../landmarker";
 import type { KeyConfig } from "./KeyControls";   
 
 type CameraFeedProps = {

@@ -27,7 +27,7 @@ export function fingerIsBent(wristID: number, jointsID: number[], nodes: Vector[
 }
 
 
-export const fingers = {
+const fingers = {
   wrist: 0,
   thumb: [1, 2, 3, 4],
   index: [5, 6, 7, 8],
