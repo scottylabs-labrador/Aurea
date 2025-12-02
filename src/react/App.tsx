@@ -35,7 +35,7 @@ export default function App() {
       
           
 
-
+      
           <h1 className="text-8xl sm:text-9xl font-bold tracking-tight text-foreground">
             AUREA
           </h1>
