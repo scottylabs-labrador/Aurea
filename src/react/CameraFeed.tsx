@@ -68,6 +68,8 @@ export default function CameraFeed({ keyConfig }: CameraFeedProps) {
 //  }, []);
 
   return (
+    <div className="flex justify-center bg-white mx-auto bg-card rounded-2xl p-8 shadow-lg">
+    <div className="rounded-xl flex items-center justify-center">
     <div style={{ position: "relative" }}>
       {/* ui for left-hand detection and chord */}
       <div style={{
@@ -112,6 +114,8 @@ export default function CameraFeed({ keyConfig }: CameraFeedProps) {
           height: "480px",
         }}
       />
+    </div>
+    </div>
     </div>
   );
 }

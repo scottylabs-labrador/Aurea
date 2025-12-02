@@ -1,6 +1,7 @@
 // KeyControls.tsx
 import React from "react";
 
+
 export type ScaleType = "major" | "minor";
 
 export interface KeyConfig {
@@ -50,4 +51,7 @@ return (
     </label>
     </div>
 );
+
+
+
 };
