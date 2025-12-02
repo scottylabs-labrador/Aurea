@@ -31,33 +31,32 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
       <section className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-        <div className="text-center space-y-8 animate-fade-in">
-          {/* Logo with dots */}
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="flex gap-2">
-              <div className="w-4 h-4 rounded-full bg-primary" />
-              <div className="w-4 h-4 rounded-full bg-secondary" />
-            </div>
-          </div>
+      
+          
 
-          {/* Main Title */}
+
           <h1 className="text-8xl sm:text-9xl font-bold tracking-tight text-foreground">
             AUREA
           </h1>
 
-          {/* Try It Out Button */}
           <button 
             onClick={handleStart}
-            className="mt-8 px-12 py-6 text-xl font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-full transition-all duration-300 hover:scale-105 hover:shadow-xl"
+            className="
+            mt-8 px-8 py-5 text-3xl
+            font-semibold 
+            bg-transparent border-5 border-[#C23643] text-[#C23643]
+            
+            rounded-full transition-all duration-250
+            hover:bg-[#C23643] hover:text-white
+            hover:scale-103 "
           >
             try it out
           </button>
-        </div>
+
       </section>
 
-      {/* Camera Section */}
+
       <section
         id="camera-section"
         className="min-h-screen flex flex-col items-center justify-center px-6 py-12 space-y-12"

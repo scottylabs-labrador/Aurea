@@ -84,7 +84,7 @@ export async function handDrawAndUpdate(
       // Debug: show which hand is detected
       statusCtx.fillStyle = "#00FFFF";
       statusCtx.font = "bold 20px monospace";
-      statusCtx.fillText(`Hand ${i}: MediaPipe="${cameraHanded}" isLeft=${isUiLeft}`, 20, 120 + i * 30);
+      //statusCtx.fillText(`Hand ${i}: MediaPipe="${cameraHanded}" isLeft=${isUiLeft}`, 20, 120 + i * 30);
       
       const detected = detectNumberFromLandmarks(landmarks); //moved out so right hand can use as well
 
@@ -104,8 +104,8 @@ export async function handDrawAndUpdate(
           ];
           statusCtx.fillStyle = "#000000";
           statusCtx.font = "bold 24px monospace";
-          for (const [index, str] of handStateString.entries())
-            statusCtx.fillText(str, 520 - 500 * i, 50 + 30 * index);
+          //for (const [index, str] of handStateString.entries())
+            //statusCtx.fillText(str, 520 - 500 * i, 50 + 30 * index);
         }
         
         //left hand: detect number and play chord
@@ -116,10 +116,10 @@ export async function handDrawAndUpdate(
         statusCtx.font = "bold 24px monospace";
         if (detected) {
           const numText = `Left number: ${detected.number} (${detected.count} fingers)`;
-          statusCtx.fillText(numText, 20, 40);
+          //statusCtx.fillText(numText, 20, 40);
 
         } else {
-          statusCtx.fillText("Left hand: no number detected", 20, 40);
+          //statusCtx.fillText("Left hand: no number detected", 20, 40);
         }
         
         if (detected) {
@@ -149,15 +149,15 @@ export async function handDrawAndUpdate(
           // Debug: show buffer status
           statusCtx.fillStyle = "#FFFF00";
           statusCtx.font = "bold 16px monospace";
-          statusCtx.fillText(`Buffer: mode=${modeVal} count=${modeCount}/${LEFT_CHANGE_THRESHOLD} prev=${prevConfirmed}`, 20, 200);
+          //statusCtx.fillText(`Buffer: mode=${modeVal} count=${modeCount}/${LEFT_CHANGE_THRESHOLD} prev=${prevConfirmed}`, 20, 200);
           
           if (modeCount >= LEFT_CHANGE_THRESHOLD && modeVal !== prevConfirmed) {
-            console.log(`🎵 Chord change detected: ${prevConfirmed} -> ${modeVal}`);
+            //console.log(`🎵 Chord change detected: ${prevConfirmed} -> ${modeVal}`);
             
             // change confirmed value
             // stop old chord
             if (typeof prevConfirmed === 'number' && prevConfirmed > 0) {
-              console.log(`Stopping chord ${prevConfirmed}`);
+              //console.log(`Stopping chord ${prevConfirmed}`);
               stopSustainedChord(prevConfirmed);
             }
 
@@ -165,16 +165,16 @@ export async function handDrawAndUpdate(
 
             if (typeof modeVal === 'number' && modeVal > 0) {
               // start new sustained chord
-              console.log(`Starting chord ${modeVal}`);
+              //console.log(`Starting chord ${modeVal}`);
               const chordName = startSustainedChord(modeVal);
-              console.log(`Chord name: ${chordName}`);
+              //console.log(`Chord name: ${chordName}`);
               try {
                 window.dispatchEvent(new CustomEvent('aurea-left-detect', { detail: { number: modeVal, chord: chordName } }));
               } catch (e) {
                 console.error('Event dispatch error:', e);
               }
             } else {
-              console.log('Stopping all chords (modeVal <= 0)');
+              //console.log('Stopping all chords (modeVal <= 0)');
               stopSustainedChord();
               try {
                 window.dispatchEvent(new CustomEvent('aurea-left-detect', { detail: { number: modeVal, chord: null } }));
@@ -194,18 +194,18 @@ export async function handDrawAndUpdate(
         // Draw it on camera
         statusCtx.fillStyle = "#0000FF";
         statusCtx.font = "bold 20px monospace";
-        statusCtx.fillText(dist_text, 20, 80);
+        //statusCtx.fillText(dist_text, 20, 80);
         if (detected){ //right hand 
         const num2Text = `Right number: ${detected.number} (${detected.count} fingers)`;
-        statusCtx.fillText(num2Text, 20, 40);
+        //statusCtx.fillText(num2Text, 20, 40);
         }
         // Debug: show what note would be played
         const noteToPlay = xToNote(right_point.x, keyConfig.key, keyConfig.scaleType);
-        statusCtx.fillText(`Note: ${noteToPlay}`, 20, 100);
+        //statusCtx.fillText(`Note: ${noteToPlay}`, 20, 100);
 
         //play note based on x position:
         if(detected && detected.number != 0){
-          console.log(getDurationFromFingers(detected.number))
+          //console.log(getDurationFromFingers(detected.number))
           maybePlayNoteFromX(1-right_point.x, keyConfig.key, keyConfig.scaleType, getDurationFromFingers(detected.number));
         }
         else{
@@ -217,7 +217,7 @@ export async function handDrawAndUpdate(
     
     // If left hand was removed, stop the chord
     if (!leftHandPresent && win.__aurea_lastConfirmedLeftNumber !== null) {
-      console.log('Left hand removed, stopping chord');
+      //console.log('Left hand removed, stopping chord');
       stopSustainedChord();
       win.__aurea_lastConfirmedLeftNumber = null;
       win.__aurea_leftBuffer = [];
@@ -228,7 +228,7 @@ export async function handDrawAndUpdate(
     
     // If right hand was removed, reset last note so it plays again when hand returns
     if (!rightHandPresent && typeof win.__aurea_lastRightNote !== 'undefined') {
-      console.log('Right hand removed, resetting note tracking');
+      //console.log('Right hand removed, resetting note tracking');
       win.__aurea_lastRightNote = null;
     }
     if (rightHandPresent && typeof win.__aurea_lastRightNote === 'undefined') {

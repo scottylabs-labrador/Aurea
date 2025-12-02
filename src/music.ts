@@ -110,7 +110,7 @@ export function maybePlayNoteFromX(
   const minGap = Tone.Time(length).toSeconds(); 
 
   if (note !== lastNote || (now - lastNoteTime) > minGap + 0.2) {
-    console.log(`Playing note: ${note} for ${length}`);
+    //console.log(`Playing note: ${note} for ${length}`);
     synth.triggerAttackRelease(note, length, now);
     lastNote = note;
     lastNoteTime = Tone.now();
@@ -197,7 +197,7 @@ export function playNoteForNumber(n: number, length = "8n") {
 
 //play a sustained chord
 export function startSustainedChord(n: number) {
-  console.log(`startSustainedChord called with n=${n}, audioReady=${audioReady}, polySynth=${!!polySynth}`);
+  //console.log(`startSustainedChord called with n=${n}, audioReady=${audioReady}, polySynth=${!!polySynth}`);
   
   if (!audioReady || !polySynth) {
     console.warn('Audio not ready or polySynth not initialized');
@@ -211,7 +211,7 @@ export function startSustainedChord(n: number) {
   }
 
   try {
-    console.log(`Playing chord: ${notes.join(', ')}`);
+    //console.log(`Playing chord: ${notes.join(', ')}`);
     polySynth.triggerAttack(notes);
     return CHORD_NAME_MAP[n] ?? notes.join(" ");
   } catch (e) {
