@@ -9,7 +9,7 @@ import {
 import { fingerIsBents, detectNumberFromLandmarks } from "./left_number";
 import type { KeyConfig } from "./react/KeyControls";
 
-import { maybePlayNoteFromX, playNoteForNumber, startSustainedChord, stopSustainedChord, xToNote } from "./music";
+import { maybePlayNoteFromX, playNoteForNumber, startSustainedChord, stopSustainedChord, xToNote, getDurationFromFingers } from "./music";
 
 import {fingers, createHandLandmarker, predictHand, extractHandStates, FingerStates } from "./landmarker"
 import { assert } from "tone/build/esm/core/util/Debug";
@@ -86,6 +86,8 @@ export async function handDrawAndUpdate(
       statusCtx.fillStyle = "#00FFFF";
       statusCtx.font = "bold 20px monospace";
       statusCtx.fillText(`Hand ${i}: MediaPipe="${cameraHanded}" isLeft=${isUiLeft}`, 20, 120 + i * 30);
+      
+      const detected = detectNumberFromLandmarks(landmarks); //moved out so right hand can use as well
 
       if (isUiLeft) {
         leftHandPresent = true;
@@ -108,7 +110,7 @@ export async function handDrawAndUpdate(
         }
         
         //left hand: detect number and play chord
-        const detected = detectNumberFromLandmarks(landmarks);
+        //const detected = detectNumberFromLandmarks(landmarks);
         
         // Debug: always show detection attempt
         statusCtx.fillStyle = "#FF0000";
@@ -116,6 +118,7 @@ export async function handDrawAndUpdate(
         if (detected) {
           const numText = `Left number: ${detected.number} (${detected.count} fingers)`;
           statusCtx.fillText(numText, 20, 40);
+
         } else {
           statusCtx.fillText("Left hand: no number detected", 20, 40);
         }
@@ -193,13 +196,23 @@ export async function handDrawAndUpdate(
         statusCtx.fillStyle = "#0000FF";
         statusCtx.font = "bold 20px monospace";
         statusCtx.fillText(dist_text, 20, 80);
-
+        if (detected){ //right hand 
+        const num2Text = `Right number: ${detected.number} (${detected.count} fingers)`;
+        statusCtx.fillText(num2Text, 20, 40);
+        }
         // Debug: show what note would be played
         const noteToPlay = xToNote(right_point.x, keyConfig.key, keyConfig.scaleType);
         statusCtx.fillText(`Note: ${noteToPlay}`, 20, 100);
 
         //play note based on x position:
-        maybePlayNoteFromX(right_point.x, keyConfig.key, keyConfig.scaleType, "8n");
+        if(detected && detected.number != 0){
+          console.log(getDurationFromFingers(detected.number))
+          maybePlayNoteFromX(1-right_point.x, keyConfig.key, keyConfig.scaleType, getDurationFromFingers(detected.number));
+        }
+        else{
+          
+        }
+        
       }
     }
     

@@ -5,7 +5,7 @@ import { handDrawAndUpdate } from "../renderer";
 import { predictHand, createHandLandmarker, extractHandStates } from "../landmarker";
 
 import { drawLineRight } from "./CanvasDraw"
-import { handleRight } from "./Right"
+//import { handleRight } from "./Right"
 
 import type { KeyConfig } from "./KeyControls";   
 

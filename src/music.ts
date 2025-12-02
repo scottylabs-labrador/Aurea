@@ -41,6 +41,16 @@ const NOTE_TO_SEMITONE: Record<string, number> = {
   B: 11,
 };
 
+export function getDurationFromFingers(x: number): string{
+  //x can be from 0-5
+  if (x === 1) return "8n" //eigth note
+  if (x === 2) return "16n" //sixteenth note
+  if (x === 3) return "4n" //quarter note
+  if (x === 4) return "2n" //half note
+  if (x === 5) return "1n" //whole note
+  return "1m" //means tah stop
+}
+
 
 function getRootSemitone(key: string): number {
   const val = NOTE_TO_SEMITONE[key];
@@ -92,17 +102,30 @@ export function maybePlayNoteFromX(
     console.warn('maybePlayNoteFromX: audio not ready or synth not initialized');
     return;
   }
-
   const note = xToNote(x, key, scaleType);
-  const now = Date.now();
   
-  // Play if note changed OR if enough time has passed (throttle to 150ms)
-  if (note !== lastNote || (now - lastNoteTime) > 150) {
-    console.log(`Playing note: ${note} (x=${x.toFixed(3)})`);
-    synth.triggerAttackRelease(note, length);
+  if(length != "1m"){ //don't play if no fingers up
+
+  const now = Tone.now();
+  const minGap = Tone.Time(length).toSeconds(); 
+
+  if (note !== lastNote || (now - lastNoteTime) > minGap + 0.2) {
+    console.log(`Playing note: ${note} for ${length}`);
+    synth.triggerAttackRelease(note, length, now);
     lastNote = note;
-    lastNoteTime = now;
+    lastNoteTime = Tone.now();
   }
+  }
+  else{
+    synth.triggerRelease(note);
+  }
+  // Play if note changed OR if enough time has passed (throttle to 150ms)
+  // if (note !== lastNote || (now - lastNoteTime) > 150) {
+  //   console.log(`Playing note: ${note} (x=${x.toFixed(3)})`);
+  //   synth.triggerAttackRelease(note, length);
+  //   lastNote = note;
+  //   lastNoteTime = now;
+  // }
 }
 
   export function xToNote(
