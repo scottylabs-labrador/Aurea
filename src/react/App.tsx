@@ -6,7 +6,7 @@ import { KeySelector, KeyConfig } from "./KeyControls";
 
 import BlurText from "./components/blurtext";
 import Footer from './components/footer';
-
+import HowTo from "./components/HowTo";
 
 export default function App() {
 
@@ -26,6 +26,13 @@ export default function App() {
 
     const scrollToHome = () => {
       const cameraSection = document.getElementById("home");
+      if (cameraSection) {
+        cameraSection.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+
+    const scrollToHow = () => {
+      const cameraSection = document.getElementById("howto");
       if (cameraSection) {
         cameraSection.scrollIntoView({ behavior: "smooth" });
       }
@@ -60,20 +67,20 @@ export default function App() {
       bg-black transition-all duration-300
       ${scrolled ? "opacity-0 -translate-y-4 hover:opacity-100 hover:translate-y-0" : "opacity-100 translate-y-0"}
       `}>
-      <div className="text-lg container flex items-center justify-center p-3  mx-auto text-gray-500">
-        <button onClick = {scrollToHome} className="text-gray-200  hover:text-white mx-1.5 sm:mx-6">home</button>
+      <div className=" text-lg container flex items-center justify-center p-3  mx-auto text-[#10489F]">
+        <button onClick = {scrollToHome} className="text-gray-200  hover:text-white mx-1.5 sm:mx-6 duration-150 ease-in-out">home</button>
 
-        <a href="#" className=" hover:text-white mx-1.5 sm:mx-6">how to</a>
+        <button onClick = {scrollToHow} className=" hover:text-white mx-1.5 sm:mx-6 duration-150 ease-in-out">how to</button>
 
-        <a href="#" className=" hover:text-white mx-1.5 sm:mx-6">about</a>
+        <a href="#" className=" hover:text-white mx-1.5 sm:mx-6 duration-150 ease-in-out">about</a>
 
 
       </div>
       </nav>
   
-      <section id = "home" className="min-h-screen flex flex-col items-center justify-center px-10 py-14">
+      <section id = "home" className="min-h-screen flex flex-col items-center justify-center px-10 py-10">
       
-          <h1 className="shrink-0 text-5xl text-[#C23643] sm:text-9xl font-bold tracking-tight text-foreground">
+          <h1 className=" text-[10rem] text-[#C23643]  font-bold tracking-tight text-foreground">
           <BlurText
         text="AUREA"
         animateBy="letters"
@@ -81,7 +88,12 @@ export default function App() {
         className=" text-[#C23643] font-bold tracking-tight"
         />
           </h1>
-          <h3 className = "mt-2 text-3xl text-[#C23643] font-semibold"> music creation at your fingertips </h3>
+          <h3 className = "text-3xl -mt-10 text-[#C23643] font-semibold"> 
+          <BlurText
+        text="music creation at your fingertips"
+        animateBy="words"
+        direction="top"
+        /> </h3>
           <button 
             onClick={handleStart}
             className="
@@ -98,13 +110,19 @@ export default function App() {
 
       </section>
 
+      <section id = "howto" className = "hover:scale-102 duration-300 ease-in-out">
+      <div className="flex justify-center bg-[#10489F] mx-24 mb-12 bg-card rounded-2xl pt-8 shadow-xl">
+      <div className="rounded-xl flex items-center justify-center">
+        <HowTo/>
+      </div> </div>
+      </section>
 
       <section
         id="camera-section"
         className="min-h-screen flex flex-col items-center justify-center px-6 py-12 space-y-12"
       >
-        <div className="w-full max-w-4xl space-y-8 animate-fade-in">
-          <h2 className="text-[#10489F] text-4xl font-bold text-center text-foreground mb-8">
+        <div className="w-full max-w-4xl space-y-8">
+          <h2 className="text-[#C23643] text-4xl font-bold text-center text-foreground mb-8">
             choose your key
           </h2>
 
