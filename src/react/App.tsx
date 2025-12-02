@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import CameraFeed from './CameraFeed';
-import * as Tone from "tone";
 import { initAudio } from "../music";
 
 import { KeySelector, KeyConfig } from "./KeyControls";

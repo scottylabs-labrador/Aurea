@@ -11,8 +11,7 @@ import type { KeyConfig } from "./react/KeyControls";
 
 import { maybePlayNoteFromX, playNoteForNumber, startSustainedChord, stopSustainedChord, xToNote, getDurationFromFingers } from "./music";
 
-import {fingers, createHandLandmarker, predictHand, extractHandStates, FingerStates } from "./landmarker"
-import { assert } from "tone/build/esm/core/util/Debug";
+import { extractHandStates, FingerStates } from "./landmarker"
 
 /** Run prediction on a video frame */
 export async function handDrawAndUpdate(
