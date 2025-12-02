@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^0.10.22-rc.20250304",
+    "motion": "^12.23.25",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tone": "^15.1.22"
