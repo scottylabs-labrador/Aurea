@@ -31,14 +31,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+      <section className="min-h-screen flex flex-col items-center justify-center px-10 py-14">
       
-          <h1 className="shrink-0 text-9xl text-[#C23643] sm:text-9xl font-bold tracking-tight text-foreground">
+          <h1 className="shrink-0 text-5xl text-[#C23643] sm:text-9xl font-bold tracking-tight text-foreground">
           <BlurText
         text="AUREA"
         animateBy="letters"
         direction="top"
-        className="text-9xl sm:text-9xl text-[#C23643] font-bold tracking-tight"
+        className=" text-[#C23643] font-bold tracking-tight"
         />
           </h1>
           <button 

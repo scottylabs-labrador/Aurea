@@ -1,10 +1,10 @@
 import { motion } from 'motion/react';
 import { useEffect, useRef, useState, useMemo } from 'react';
 
-const buildKeyframes = (from, steps) => {
+const buildKeyframes = (from: { [x: string]: any; }, steps: any[]) => {
   const keys = new Set([...Object.keys(from), ...steps.flatMap(s => Object.keys(s))]);
 
-  const keyframes = {};
+  const keyframes : Record<string, any[]> = {};
   keys.forEach(k => {
     keyframes[k] = [from[k], ...steps.map(s => s[k])];
   });
@@ -19,10 +19,10 @@ const BlurText = ({
   direction = 'top',
   threshold = 0.1,
   rootMargin = '0px',
-  animationFrom,
-  animationTo,
-  easing = t => t,
-  onAnimationComplete,
+  animationFrom =null,
+  animationTo = null,
+  easing = (t: any) => t,
+  onAnimationComplete = null,
   stepDuration = 0.35
 }) => {
   const elements = animateBy === 'words' ? text.split(' ') : text.split('');
@@ -35,7 +35,7 @@ const BlurText = ({
       ([entry]) => {
         if (entry.isIntersecting) {
           setInView(true);
-          observer.unobserve(ref.current);
+          //observer.unobserve(ref.current);
         }
       },
       { threshold, rootMargin }
@@ -80,7 +80,7 @@ const BlurText = ({
           times,
           delay: (index * delay) / 1000
         };
-        spanTransition.ease = easing;
+        //spanTransition.ease = easing;
 
         return (
           <motion.span
@@ -89,7 +89,7 @@ const BlurText = ({
             initial={fromSnapshot}
             animate={inView ? animateKeyframes : fromSnapshot}
             transition={spanTransition}
-            onAnimationComplete={index === elements.length - 1 ? onAnimationComplete : undefined}
+            //onAnimationComplete={index === elements.length - 1 ? onAnimationComplete : undefined}
           >
             {segment === ' ' ? '\u00A0' : segment}
             {animateBy === 'words' && index < elements.length - 1 && '\u00A0'}
