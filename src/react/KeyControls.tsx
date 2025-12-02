@@ -30,7 +30,7 @@ const handleScaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 };
 
 return (
-    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+    <div className = "flex gap-[0.5rem] align-center justify-center ">
     <label>
         Key:{" "}
         <select value={value.key} onChange={handleKeyChange}>

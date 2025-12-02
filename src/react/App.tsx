@@ -5,6 +5,8 @@ import { initAudio } from "../music";
 import { KeySelector, KeyConfig } from "./KeyControls";
 
 import BlurText from "./components/blurtext";
+import Footer from './components/footer';
+
 
 export default function App() {
 
@@ -79,6 +81,7 @@ export default function App() {
         className=" text-[#C23643] font-bold tracking-tight"
         />
           </h1>
+          <h3 className = "mt-2 text-3xl text-[#C23643] font-semibold"> music creation at your fingertips </h3>
           <button 
             onClick={handleStart}
             className="
@@ -115,23 +118,7 @@ export default function App() {
         </div>
       </section>
 
-
-      <footer className="px-4 py-8 bg-black text-white">
-	<div className= "container flex flex-wrap items-center justify-center mx-auto space-y-4 sm:justify-between sm:space-y-0">
-		<div className="flex flex-row pr-3 space-x-4 sm:space-x-8">
-			
-			</div>
-			<ul className=" flex flex-wrap items-center space-x-4 sm:space-x-8">
-				<li>
-					<a rel="Github Link" href="https://github.com/scottylabs-labrador/Aurea">Github</a>
-				</li>
-				<li>
-					<a rel="Osprey Link" href="https://osprey.velroi.com/forum/project/68fd383013f6bb5081638fbd">Osprey</a>
-				</li>
-			</ul>
-		</div>
-
-</footer>
+      <div> <Footer/> </div>
 
     </div>
   );
