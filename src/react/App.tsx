@@ -67,7 +67,7 @@ export default function App() {
       bg-black transition-all duration-300
       ${scrolled ? "opacity-0 -translate-y-4 hover:opacity-100 hover:translate-y-0" : "opacity-100 translate-y-0"}
       `}>
-      <div className=" text-lg container flex items-center justify-center p-3  mx-auto text-[#10489F]">
+      <div className=" text-lg container flex items-center justify-center p-3  mx-auto text-[#7295CB]">
         <button onClick = {scrollToHome} className="text-gray-200  hover:text-white mx-1.5 sm:mx-6 duration-150 ease-in-out">home</button>
 
         <button onClick = {scrollToHow} className=" hover:text-white mx-1.5 sm:mx-6 duration-150 ease-in-out">how to</button>
