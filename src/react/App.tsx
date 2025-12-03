@@ -5,7 +5,7 @@ import { initAudio } from "../music";
 import { KeySelector, KeyConfig } from "./KeyControls";
 
 import BlurText from "./components/blurtext";
-import Footer from './components/footer';
+import Footer from './components/Footer';
 import HowTo from "./components/HowTo";
 
 export default function App() {
